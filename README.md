@@ -1,5 +1,7 @@
 Drop this file in your root of the game directory
 
+![screenshot](Screenshots/main_menu.jpg)
+
 Example:
 C:\Games\24LH-0.3.0-pc\
 
