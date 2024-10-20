@@ -23,8 +23,8 @@ init 5:# Screens
             textbutton _("Load") action ShowMenu("load")
 
             textbutton _("Preferences") action ShowMenu("preferences")
-
-            textbutton _("Music") action ShowMenu("musicroom")
+            if JGSLoadable("music_room") and JGSLoadable("music_room_screen") and JGSLoadable("music_room_definitions"):
+                textbutton _("Music") action ShowMenu("musicroom")
 
             if _in_replay:
 
@@ -205,11 +205,12 @@ init 5:# Screens
         text "Walkthrough"
         text "1. Walkthrough Suggestions Toggled using {a=#:None}{color=#f00}(W){/color}{/a} or in preferences menu" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
         text "2. Walkthrough Tooltips Toggled using {a=#:None}{color=#f00}(Shift+T){/color}{/a} or in preferences menu" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
-        text "Music Player"
-        text "1. Music Player can be Toggled ingame using {a=#:None}{color=#f00}(M){/color}{/a}" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
-        text "2. Hovering over Volume Slider allows mousewheel up/down control" xoffset 50 
-        text "3. Music Credits {a=show:music_credit}Click me{/a}"  xoffset 50 
-        text "4. Any Suggestions for Royalty Free Music you'd like in the game {a=[gui.mod_issues]}Here{/a}" xoffset 50
+        if JGSLoadable("music_room") and JGSLoadable("music_room_screen") and JGSLoadable("music_room_definitions"):
+            text "Music Player"
+            text "1. Music Player can be Toggled ingame using {a=#:None}{color=#f00}(M){/color}{/a}" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
+            text "2. Hovering over Volume Slider allows mousewheel up/down control" xoffset 50 
+            text "3. Music Credits {a=show:music_credit}Click me{/a}"  xoffset 50 
+            text "4. Any Suggestions for Royalty Free Music you'd like in the game {a=[gui.mod_issues]}Here{/a}" xoffset 50
         text "Quick Menu Options"
         text "1. Quick Menu Visibility Options Toggled using {a=#:None}{color=#f00}(Q){/color}{/a} or in preferences menu" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
         text "2. Quick Menu Position Options Toggled Using {a=#:None}{color=#f00}(Shift+Q){/color}{/a} or in preferences menu" xoffset 50 tooltip "This can be toggled in the main menu or in the game"
@@ -397,7 +398,7 @@ init 5:# Screens
             style "return_button"
             if title == "Walkthrough Colors":
                 action Hide("color_picker_wt", transition=dissolve)
-            elif title == "Music Player Colors":
+            elif title == "Music Player Settings":
                 action Hide("color_picker_mr", transition=dissolve)
             else:
                 action Return()
@@ -408,14 +409,14 @@ init 5:# Screens
             key "game_menu":
                 if title == "Walkthrough Colors":
                     action Hide("color_picker_wt", transition=dissolve)
-                elif title == "Music Player Colors":
+                elif title == "Music Player Settings":
                     action Hide("color_picker_mr", transition=dissolve)
                 else:
                     action ShowMenu("main_menu")
         else:
             if title == "Walkthrough Colors":
                 key "game_menu" action Hide("color_picker_wt", transition=dissolve)
-            elif title == "Music Player Colors":
+            elif title == "Music Player Settings":
                 key "game_menu" action Hide("color_picker_mr", transition=dissolve)
             else:
                 key "game_menu" action Return()
@@ -562,32 +563,33 @@ init 5:# Screens
 
                 hbox:
                     box_wrap True
-                    vbox:
-                        style_prefix "check"
-                        label _("Music Volume\n[jg_s]{}".format("Fast" if persistent._fast_vol_music else "Slow"))
-                        textbutton _("Fast"):
-                            action SetField(persistent, "_fast_vol_music", True)
-                        textbutton _("Slow"):
-                            action SetField(persistent, "_fast_vol_music", False)
-                    vbox:
-                        style_prefix "check"
-                        label _("Music Overlay\n[jg_s]{}".format("On" if persistent._music_overlay else "Off"))
-                        textbutton _("On"):
-                            action SetField(persistent, "_music_overlay", True)
-                        textbutton _("Off"):
-                            action SetField(persistent, "_music_overlay", False)
-                    vbox:
-                        style_prefix "check"
-                        label _("Main Menu Music\n[jg_s]{}".format("On" if persistent._main_menu_track else "Off"))
-                        textbutton _("On"):
-                            if persistent._main_menu_track:
-                                action NullAction()
-                            else:
-                                action SetField(persistent, "_main_menu_track", True), Play("music", PunchDeck808Lotus)
-                            selected persistent._main_menu_track
-                        textbutton _("Off"):
-                            action SetField(persistent, "_main_menu_track", False), Stop("music")
-                            selected not persistent._main_menu_track
+                    if JGSLoadable("music_room") and JGSLoadable("music_room_screen") and JGSLoadable("music_room_definitions"):
+                        vbox:
+                            style_prefix "check"
+                            label _("Music Volume\n[jg_s]{}".format("Fast" if persistent._fast_vol_music else "Slow"))
+                            textbutton _("Fast"):
+                                action SetField(persistent, "_fast_vol_music", True)
+                            textbutton _("Slow"):
+                                action SetField(persistent, "_fast_vol_music", False)
+                        vbox:
+                            style_prefix "check"
+                            label _("Music Overlay\n[jg_s]{}".format("On" if persistent._music_overlay else "Off"))
+                            textbutton _("On"):
+                                action SetField(persistent, "_music_overlay", True)
+                            textbutton _("Off"):
+                                action SetField(persistent, "_music_overlay", False)
+                        vbox:
+                            style_prefix "check"
+                            label _("Main Menu Music\n[jg_s]{}".format("On" if persistent._main_menu_track else "Off"))
+                            textbutton _("On"):
+                                if persistent._main_menu_track:
+                                    action NullAction()
+                                else:
+                                    action SetField(persistent, "_main_menu_track", True), Play("music", PunchDeck808Lotus)
+                                selected persistent._main_menu_track
+                            textbutton _("Off"):
+                                action SetField(persistent, "_main_menu_track", False), Stop("music")
+                                selected not persistent._main_menu_track
                     vbox:
                         style_prefix "check"
                         label _("Support Mod\n[jg_s]{}".format("On" if persistent._support_mod_display else "Off"))
