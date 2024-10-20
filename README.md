@@ -1,11 +1,6 @@
-Drop this file in your root of the game directory
+I have created a Multi-Mod with walkthrough for 24 Lustful Hours by [Carnal Studio](https://www.patreon.com/CarnalStudio)
 
-![screenshot](Screenshots/main_menu.jpg)
-
-Example:
-C:\Games\24LH-0.3.0-pc\
-
-I have created a Multi-Mod with walkthrough for 24 Lustful Hours by Carnal Studio
+![screenshot](Screenshots/01_main_menu.jpg)
 
 Mod Features:
   1. Walkthough with Suggestions. Not Really Required but just my best suggestions
