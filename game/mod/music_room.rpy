@@ -2,6 +2,33 @@ default music_last_playing = None
 default stoptrack = None
 default time_position = 0.0
 default time_duration = 0.0
+default persistent._current_music_room = 1
+default persistent._music_icon_idle_color = "#FB4301"
+default persistent._music_icon_hover_color = "#2a2a2a"
+default persistent._music_icon_idle_color_default = "#FB4301"
+default persistent._music_icon_hover_color_default = "#2a2a2a"
+default persistent._music_overlay = True
+default persistent._music_ff_rew = 1.0
+default persistent._start_music_on_enter = True
+default custom_keep_music_playing = True
+default persistent._use_outline_music_buttons = False
+
+init 10 python:
+    def MP_IMG(img,state="idle", size=(gui.button_size,gui.button_size)):
+        return Transform(
+            'mod/images/{}_outline.png'.format(img) if not persistent._use_outline_music_buttons else 'mod/images/{}_solid.png'.format(img),
+            matrixcolor=ColorSingle(getattr(persistent, "_music_icon_{}_color".format(state))),
+            xysize=size,
+            align=(0.5,0.5))
+    
+    def MP_BAR(state):
+        return Frame(Solid(getattr(persistent, "_music_icon_{}_color".format(state))), gui.slider_borders, tile=gui.slider_tile)
+
+    def MP_THUMB(state):
+        return Transform(Solid(getattr(persistent,"_music_icon_{}_color".format(state))),ysize=gui.slider_size, xsize=30)
+
+    def MP_TEXT(state):
+        return getattr(persistent, "_music_icon_{}_color".format(state))
 
 init -1000 python:
     import pygame
@@ -90,6 +117,9 @@ init -1000 python:
     def setRepeatRatedown():
         if hasattr(config,"key_repeat"):
             setattr(config,"key_repeat",(.3, .03))
+
+    def round_float(value):
+        return round(float(value),2)
 
     def generate_float_list(start,end,step):
         float_list = []
@@ -715,7 +745,7 @@ init -1000 python:
 
         dur = self.get_duration()
 
-        value = pos+1.0
+        value = pos+persistent._music_ff_rew
 
         if value >= dur:
             value = dur
@@ -770,7 +800,7 @@ init -1000 python:
         pos = self.get_position()
         dur = self.get_duration()
 
-        value = pos-1.0
+        value = pos-persistent._music_ff_rew
 
         if value < 0.0:
             value = 0.0
@@ -1014,63 +1044,6 @@ init python:
         ])
     aspect_ratio = (config.screen_width, config.screen_height)
 
-define gui.frame_alpha = 0.5
-define gui.frame_color_border = gui.accent_color
-define gui.frame_color_background = "#000"
-define gui.bar_left_color = "#FB4301"
-define gui.bar_right_color = "#000"
-define gui.bar_bottom_color = gui.bar_right_color
-define gui.bar_top_color = gui.bar_left_color
-
-define gui.game_menu_navigation_frame_xsize = 420
-
-define gui.musicroom_frame_background = Transform(
-    Frame(
-        "gui/frame.png",
-        gui.frame_borders, tile=gui.frame_tile),
-    matrixcolor=ColorizeMatrix(gui.frame_color_background, gui.frame_color_border),
-    alpha=gui.frame_alpha)
-define gui.musicroom_frame_padding = gui.frame_borders.padding
-define gui.musicroom_frame_xsize = config.screen_width - 420 - (gui.bar_size*3)
-
-
-define gui.music_icon_idle_color = "#FB4301"
-define gui.music_icon_hover_color = "#000"
-define gui.music_icon_selected_color = gui.selected_color
-define gui.music_icon_insensitive_color = gui.insensitive_color
-define gui.button_size = 33
-define gui.button_size_mute = (50, 33)
-
-define gui.musicroom_text_color = gui.text_color
-define gui.musicroom_text_font = gui.text_font
-define gui.musicroom_text_outlines = [(2, "#0009", 1, 1)]
-
-define gui.musicroom_time_text_font = gui.text_font
-define gui.musicroom_time_size = gui.text_size
-define gui.musicroom_time_text_outlines = [(2, "#0009", 1, 1)]
-
-define gui.musicroom_button_text_font = gui.text_font
-define gui.musicroom_button_text_outlines = [(2, "#0009", 1, 1)]
-define gui.musicroom_button_text_idle_color = "#FB4301"
-define gui.musicroom_button_text_hover_color = "#000"
-define gui.musicroom_button_text_selected_color = gui.selected_color
-define gui.musicroom_button_text_insensitive_color = gui.insensitive_color
-
-define gui.musicroom_bar_left_idle_color = gui.bar_left_color
-define gui.musicroom_bar_left_hover_color = gui.bar_right_color
-
-define gui.musicroom_bar_right_idle_color = gui.bar_right_color
-define gui.musicroom_bar_right_hover_color = gui.bar_left_color
-
-#define gui.musicroom_button_text_idle_outlines = [(2, "#0009", 1, 1)]
-#define gui.musicroom_button_text_hover_outlines = [(2, "#0009", 1, 1)]
-#define gui.musicroom_button_text_selected_outlines = [(2, "#0009", 1, 1)]
-#define gui.musicroom_button_text_insensitive_outlines = [(2, "#0009", 1, 1)]
-
-default persistent._start_music_on_enter = True
-default custom_keep_music_playing = True
-default persistent._use_outline_music_buttons = False
-
 init -5 python:
     class AudioCredits:
         TrackInfo = []
@@ -1120,16 +1093,6 @@ init python:
         #title, artist, filename, link, adddescription
 
     from collections import OrderedDict
-    def sorted_music_tracks(music_dict, mood="All"):
-        sorted_music = OrderedDict()
-
-        # Sort the dictionary by artist name
-        for artist in sorted(music_dict.keys()):
-            # Sort the songs for each artist by title
-            sorted_tracks = OrderedDict(sorted(music_dict[artist].items()))
-            sorted_music[artist] = sorted_tracks
-
-        return sorted_music
 
     def sorted_music_tracks(music_dict, mood="All"):
         sorted_music = OrderedDict()
@@ -2459,3 +2422,56 @@ image settings_button_insensitive = ConditionSwitch(
     "not persistent._use_outline_music_buttons", " settings_outline_insensitive",
     "persistent._use_outline_music_buttons", " settings_solid_insensitive",
 )
+
+define gui.frame_alpha = 0.5
+define gui.frame_color_border = gui.accent_color
+define gui.frame_color_background = "#000"
+define gui.bar_left_color = "#FB4301"
+define gui.bar_right_color = adjust_brightness("#FB4301", -100)
+define gui.bar_bottom_color = gui.bar_right_color
+define gui.bar_top_color = gui.bar_left_color
+
+define gui.game_menu_navigation_frame_xsize = 420
+
+define gui.musicroom_frame_background = Transform(
+    Frame(
+        "gui/frame.png",
+        gui.frame_borders, tile=gui.frame_tile),
+    matrixcolor=ColorizeMatrix(gui.frame_color_background, gui.frame_color_border),
+    alpha=gui.frame_alpha)
+define gui.musicroom_frame_padding = gui.frame_borders.padding
+define gui.musicroom_frame_xsize = config.screen_width - 420 - (gui.bar_size*3)
+
+
+define gui.music_icon_idle_color = "#FB4301"
+define gui.music_icon_hover_color = adjust_brightness("#FB4301", -100)
+define gui.music_icon_selected_color = gui.selected_color
+define gui.music_icon_insensitive_color = gui.insensitive_color
+define gui.button_size = 33
+define gui.button_size_mute = (50, 33)
+
+define gui.musicroom_text_color = gui.text_color
+define gui.musicroom_text_font = gui.text_font
+define gui.musicroom_text_outlines = [(2, "#0009", 1, 1)]
+
+define gui.musicroom_time_text_font = gui.text_font
+define gui.musicroom_time_size = gui.text_size
+define gui.musicroom_time_text_outlines = [(2, "#0009", 1, 1)]
+
+define gui.musicroom_button_text_font = gui.text_font
+define gui.musicroom_button_text_outlines = [(2, "#0009", 1, 1)]
+define gui.musicroom_button_text_idle_color = "#FB4301"
+define gui.musicroom_button_text_hover_color = adjust_brightness("#FB4301", -100)
+define gui.musicroom_button_text_selected_color = gui.selected_color
+define gui.musicroom_button_text_insensitive_color = gui.insensitive_color
+
+define gui.musicroom_bar_left_idle_color = gui.bar_left_color
+define gui.musicroom_bar_left_hover_color = gui.bar_right_color
+
+define gui.musicroom_bar_right_idle_color = gui.bar_right_color
+define gui.musicroom_bar_right_hover_color = gui.bar_left_color
+
+#define gui.musicroom_button_text_idle_outlines = [(2, "#0009", 1, 1)]
+#define gui.musicroom_button_text_hover_outlines = [(2, "#0009", 1, 1)]
+#define gui.musicroom_button_text_selected_outlines = [(2, "#0009", 1, 1)]
+#define gui.musicroom_button_text_insensitive_outlines = [(2, "#0009", 1, 1)]

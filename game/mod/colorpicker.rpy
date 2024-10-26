@@ -93,7 +93,6 @@ init -100 python:
         def get_style(self):
             return self.style, "v" + self.style
 
-
 init -100 python in shaders:
     class vec2(tuple):
         def __new__(cls, *args):
@@ -429,7 +428,6 @@ init -10 python:
         def visit(self):
             return [self._sat_value_rect, self._cursor]
 
-
 transform color_picker_sat_value(color):
     shader "collection.color_picker.sat_value_rect"
     u_color color
@@ -462,10 +460,9 @@ init python:
             if callback is not None:
                 callback(self._hue.get(), self._sat.get(), self._value.get())
 
-
-screen color_picker(color, field):
+screen color_picker(color, field, align=(1.0,0.0)):
     hbox:
-        align (1.0,0.0)
+        align align
         #spacing 4
 
         add SaturationValuePicker(
